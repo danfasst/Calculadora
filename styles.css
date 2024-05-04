@@ -69,9 +69,19 @@ body {
     width: 93%;
 }
 
-
-
 .result p {
     margin: 4px 0;
     text-align: start;
+}
+
+.button-container {
+    text-align: center;
+}
+
+.form-container button {
+    margin: 10px auto;
+}
+
+.form-container option {
+    margin: 10px auto;
 }

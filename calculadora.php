@@ -12,8 +12,8 @@
     <div class="calculator">
         <h2>Calculadora PHP</h2>
         <form method="post">
-            <input type="number" name="numero1" placeholder="Número 1" required>
-            <select name="operacao" required>
+            <input type="number" name="numero1" id="numero1" placeholder="Número 1" required>
+            <select name="operacao" id="operacao" required>
                 <option value="+">+</option>
                 <option value="-">-</option>
                 <option value="*">*</option>
@@ -21,12 +21,14 @@
                 <option value="fatorial">Fatorial</option>
                 <option value="potencia">Potência</option>
             </select>
-            <input type="number" name="numero2" placeholder="Número 2" required>
-            <button type="submit" name="calcular">Calcular</button>
-            <button type="submit" name="salvar">Salvar na Memória</button>
-            <button type="submit" name="recuperar">Recuperar da Memória</button>
-            <button type="submit" name="apagar">Apagar Histórico</button>
-            <button type="submit" name="consultar">Consultar Histórico</button>
+            <input type="number" name="numero2" id="numero2" placeholder="Número 2" required>
+            <div class="button-container">
+                <button type="submit" name="calcular">Calcular</button>
+                <button type="submit" name="salvar">Salvar na Memória</button>
+                <button type="submit" name="recuperar">Recuperar da Memória</button>
+                <button type="submit" name="apagar">Apagar Histórico</button>
+                <button type="submit" name="consultar">Consultar Histórico</button>
+            </div>
         </form>
         <div class="result">
             <?php
@@ -34,115 +36,106 @@
 
             // Funções para memória
             function salvarMemoria($numero1, $operacao, $numero2) {
-              $_SESSION['memoria_numero1'] = $numero1;
-              $_SESSION['memoria_operacao'] = $operacao;
-              $_SESSION['memoria_numero2'] = $numero2;
-              echo "<p>Valor salvo na memória!</p>";
-            }
-
-            function recuperarMemoria() {
-              if (isset($_SESSION['memoria_numero1'], $_SESSION['memoria_operacao'], $_SESSION['memoria_numero2'])) {
-                $numero1 = $_SESSION['memoria_numero1'];
-                $operacao = $_SESSION['memoria_operacao'];
-                $numero2 = $_SESSION['memoria_numero2'];
-
-                echo "<script>document.getElementById('numero1').value = '$numero1';</script>";
-                echo "<script>document.getElementById('operacao').value = '$operacao';</script>";
-                echo "<script>document.getElementById('numero2').value = '$numero2';</script>";
-                echo "<p>Valor da memória recuperado!</p>";
-              } else {
-                echo "<p>Memória vazia!</p>";
-              }
-            }
-
-            // Funções para histórico
-            function registrarOperacao($numero1, $operacao, $numero2, $resultado) {
-              if (!isset($_SESSION['historicoOperacoes'])) {
-                $_SESSION['historicoOperacoes'] = [];
+              if (!isset($_SESSION['memoriaOperacoes'])) {
+                $_SESSION['memoriaOperacoes'] = [];
               }
 
               $operacaoAtual = [
                 "numero1" => $numero1,
                 "operacao" => $operacao,
-                "numero2" => $numero2,
-                "resultado" => $resultado
+                "numero2" => $numero2
               ];
-              array_push($_SESSION['historicoOperacoes'], $operacaoAtual);
+              array_push($_SESSION['memoriaOperacoes'], $operacaoAtual);
+              echo "<p>Operação salva na memória!</p>";
             }
 
-            function exibirHistorico() {
-              if (empty($_SESSION['historicoOperacoes'])) {
-                echo "<p>Histórico vazio!</p>";
-              } else {
-                echo "<p><b>Histórico de Operações:</b></p>";
-                echo "<table>";
-                echo "<tr><th>Número 1</th><th>Operação</th><th>Número 2</th><th>Resultado</th></tr>";
-                foreach ($_SESSION['historicoOperacoes'] as $operacao) {
-                  echo "<tr>";
-                  echo "<td>{$operacao['numero1']}</td>";
-                  echo "<td>{$operacao['operacao']}</td>";
-                  echo "<td>{$operacao['numero2']}</td>";
-                  echo "<td>{$operacao['resultado']}</td>";
-                  echo "</tr>";
+            function recuperarMemoria() {
+              if (isset($_SESSION['memoriaOperacoes'])) {
+                echo "<label for='operacoes_salvas'>Operações Salvas:</label>";
+                echo "<select id='operacoes_salvas' name='operacao_salva'>";
+                foreach ($_SESSION['memoriaOperacoes'] as $index => $operacao) {
+                  $num1 = $operacao['numero1'];
+                  $op = $operacao['operacao'];
+                  $num2 = $operacao['numero2'];
+                  echo "<option value='$index'>$num1 $op $num2</option>";
                 }
-                echo "</table>";
+                echo "</select>";
+                echo "<button type='submit' name='recuperar_operacao'>Recuperar</button>";
+              } else {
+                echo "<p>Memória vazia!</p>";
               }
             }
 
-            function apagarHistorico() {
-              unset($_SESSION['historicoOperacoes']);
-              echo "<p>Histórico apagado!</p>";
-            }
+// Função para registrar a operação no histórico
+function registrarOperacao($numero1, $operacao, $numero2, $resultado) {
+  if (!isset($_SESSION['historicoOperacoes'])) {
+      $_SESSION['historicoOperacoes'] = [];
+  }
 
-            // Processamento de dados do formulário
-            if (isset($_POST['calcular'])) {
-              $numero1 = $_POST['numero1'];
-              $numero2 = $_POST['numero2'];
-              $operacao = $_POST['operacao'];
+  $operacaoAtual = [
+      "numero1" => $numero1,
+      "operacao" => $operacao,
+      "numero2" => $numero2,
+      "resultado" => $resultado
+  ];
 
-              // Verificar se há valores na memória para usar
-              if (isset($_SESSION['memoria_numero1'], $_SESSION['memoria_operacao'], $_SESSION['memoria_numero2'])) {
-                $numero1 = $_SESSION['memoria_numero1'];
-                $operacao = $_SESSION['memoria_operacao'];
-                $numero2 = $_SESSION['memoria_numero2'];
-                unset($_SESSION['memoria_numero1'], $_SESSION['memoria_operacao'], $_SESSION['memoria_numero2']);
-              }
+  $_SESSION['historicoOperacoes'][] = $operacaoAtual;
+}
 
-              // Executar operação
-              switch ($operacao) {
-                case '+':
-                  $resultado = $numero1 + $numero2;
-                  break;
-                case '-':
-                  $resultado = $numero1 - $numero2;
-                  break;
-                case '*':
-                  $resultado = $numero1 * $numero2;
-                  break;
-                case '/':
-                  if ($numero2 != 0) {
-                    $resultado = $numero1 / $numero2;
-                  } else {
-                    $resultado = "Divisão por zero!";
-                  }
-                  break;
-                case 'fatorial':
-                  $resultado = fatorial($numero1);
-                  break;
-                case 'potencia':
-                  $resultado = pow($numero1, $numero2);
-                  break;
-                default:
-                  $resultado = "Operação inválida!";
-                  break;
-              }
+// Função para apagar o histórico de operações
+function apagarHistorico() {
+  if (isset($_SESSION['historicoOperacoes'])) {
+      unset($_SESSION['historicoOperacoes']);
+      echo "<p>Histórico apagado!</p>";
+  } else {
+      echo "<p>Histórico não encontrado ou já está vazio!</p>";
+  }
+}
 
-              // Registrar operação no histórico
-              registrarOperacao($numero1, $operacao, $numero2, $resultado);
-              echo "<p>$resultado</p>";
-            }
 
-            // Processamento de dados do formulário para os botões
+
+// Processamento de dados do formulário
+if (isset($_POST['calcular'])) {
+  $numero1 = $_POST['numero1'];
+  $numero2 = $_POST['numero2'];
+  $operacao = $_POST['operacao'];
+
+  switch ($operacao) {
+      case '+':
+          $resultado = $numero1 + $numero2;
+          break;
+      case '-':
+          $resultado = $numero1 - $numero2;
+          break;
+      case '*':
+          $resultado = $numero1 * $numero2;
+          break;
+      case '/':
+          if ($numero2 != 0) {
+              $resultado = $numero1 / $numero2;
+          } else {
+              $resultado = "Divisão por zero!";
+          }
+          break;
+      case 'fatorial':
+          $resultado = fatorial($numero1);
+          break;
+      case 'potencia':
+          $resultado = pow($numero1, $numero2);
+          break;
+      default:
+          $resultado = "Operação inválida!";
+          break;
+  }
+
+  // Exibir o resultado
+  echo "<p>Resultado: $resultado</p>";
+
+  // Registrar operação no histórico
+  registrarOperacao($numero1, $operacao, $numero2, $resultado);
+}
+
+
             if (isset($_POST['salvar'])) {
               if (isset($_POST['numero1'], $_POST['operacao'], $_POST['numero2'])) {
                 $numero1 = $_POST['numero1'];
@@ -156,6 +149,18 @@
 
             if (isset($_POST['recuperar'])) {
               recuperarMemoria();
+            }
+
+            if (isset($_POST['recuperar_operacao'])) {
+              $index = $_POST['operacao_salva'];
+              $operacaoSelecionada = $_SESSION['memoriaOperacoes'][$index];
+              $numero1 = $operacaoSelecionada['numero1'];
+              $operacao = $operacaoSelecionada['operacao'];
+              $numero2 = $operacaoSelecionada['numero2'];
+              // Populating the input fields
+              echo "<script>document.getElementById('numero1').value = '$numero1';</script>";
+              echo "<script>document.getElementById('operacao').value = '$operacao';</script>";
+              echo "<script>document.getElementById('numero2').value = '$numero2';</script>";
             }
 
             if (isset($_POST['apagar'])) {
@@ -173,6 +178,22 @@
             ?>
         </div>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const selectOperacaoSalva = document.getElementById("operacoes_salvas");
+            selectOperacaoSalva.addEventListener("change", function () {
+                const selectedIndex = selectOperacaoSalva.value;
+                const operacaoSelecionada = <?php echo isset($_SESSION['memoriaOperacoes']) ? json_encode($_SESSION['memoriaOperacoes']) : '[]'; ?>;
+                if (selectedIndex >= 0 && selectedIndex < operacaoSelecionada.length) {
+                    const operacao = operacaoSelecionada[selectedIndex];
+                    document.getElementById('numero1').value = operacao['numero1'];
+                    document.getElementById('operacao').value = operacao['operacao'];
+                    document.getElementById('numero2').value = operacao['numero2'];
+                }
+            });
+        });
+    </script>
 
 </body>
 
