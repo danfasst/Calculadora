@@ -12,7 +12,7 @@
     <div class="calculator">
         <h2>Calculadora PHP</h2>
         <form method="post">
-            <input type="number" name="numero1" id="numero1" placeholder="Número 1" required>
+            <input type="number" name="numero1" id="numero1" placeholder="Número 1">
             <select name="operacao" id="operacao" required>
                 <option value="+">+</option>
                 <option value="-">-</option>
@@ -21,7 +21,7 @@
                 <option value="fatorial">Fatorial</option>
                 <option value="potencia">Potência</option>
             </select>
-            <input type="number" name="numero2" id="numero2" placeholder="Número 2" required>
+            <input type="number" name="numero2" id="numero2" placeholder="Número 2">
             <div class="button-container">
                 <button type="submit" name="calcular">Calcular</button>
                 <button type="submit" name="salvar">Salvar na Memória</button>
